@@ -38,7 +38,7 @@ export const UserCard = ({ user }: { user: User }) => {
             {fullName}
           </CardTitle>
           <p className='text-sm text-muted-foreground'>
-            {auth.orgRole?.includes('org:admin') ? 'Administrator' : 'Member'}
+            {user.role.includes('org:admin') ? 'Administrator' : 'Member'}
           </p>
         </div>
       </CardHeader>
@@ -60,7 +60,7 @@ export const UserCard = ({ user }: { user: User }) => {
       </CardContent>
       {auth.orgRole?.includes('org:admin') && (
         <CardFooter className='flex justify-end gap-2'>
-          {auth.userId != user.id && (
+          {auth.userId != user.id && !user.role?.includes('org:admin') && (
             <Button
               variant='destructive'
               size='sm'
@@ -71,13 +71,15 @@ export const UserCard = ({ user }: { user: User }) => {
               Delete
             </Button>
           )}
-          <Link
-            href={`/staffs/${user.id}/edit`}
-            className={buttonVariants({ size: 'sm' })}
-          >
-            <Edit className='h-4 w-4' />
-            Edit
-          </Link>
+          {!user.role?.includes('org:admin') && (
+            <Link
+              href={`/staffs/${user.id}/edit`}
+              className={buttonVariants({ size: 'sm' })}
+            >
+              <Edit className='h-4 w-4' />
+              Edit
+            </Link>
+          )}
         </CardFooter>
       )}
     </Card>

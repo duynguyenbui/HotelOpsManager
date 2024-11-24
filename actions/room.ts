@@ -31,6 +31,49 @@ export const createRoom = async (data: RoomSchema) => {
   }
 };
 
-export const getAllRooms = async () => {
-  return [];
+export const updateRoom = async (id: string, data: RoomSchema) => {
+  try {
+    if (!id || !data) {
+      return { success: false, message: 'No data provided' };
+    }
+
+    const transactions = await db.transaction.findMany({
+      where: {
+        roomId: id,
+        OR: [
+          {
+            status: 'PEDNING',
+          },
+          {
+            status: 'CHECKIN',
+          },
+        ],
+      },
+    });
+
+    if (transactions.length > 0) {
+      return {
+        success: false,
+        message: 'Cannot update room with active transactions',
+      };
+    }
+
+    await db.room.update({
+      where: { id },
+      data: {
+        roomNumber: data.roomNumber,
+        floor: data.floor,
+        status: data.status,
+        imageUrls: data.imageUrls,
+        roomTypeId: data.roomTypeId,
+      },
+    });
+
+    revalidatePath('/rooms');
+
+    return { success: true, message: 'Room updated' };
+  } catch (error) {
+    console.error('Failed to update room:', error);
+    return { success: false, message: 'Failed to update room' };
+  }
 };

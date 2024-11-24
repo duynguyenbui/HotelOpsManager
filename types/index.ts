@@ -88,7 +88,6 @@ export const roomSchema = z.object({
 
 export const updateStaffSchema = z.object({
   id: z.string(),
-  email: z.string().email(),
   username: z.string().optional(),
   password: z.string().optional(),
   firstName: z.string().optional(),

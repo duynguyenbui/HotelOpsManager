@@ -69,3 +69,6 @@ export const updateGuest = async (id: string, data: UpdateGuestData) => {
     return { success: false, error: 'Failed to update guest' };
   }
 };
+export const getGuests = () => {
+  return db.guest.findMany();
+};

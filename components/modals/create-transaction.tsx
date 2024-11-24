@@ -1,6 +1,8 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,204 +13,301 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { createdStaffSchema } from '@/types';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import {
+  CreateTransactionSchema,
+  createTransactionSchema,
+  RoomWithType,
+} from '@/types';
 import { useTransactionModal } from '@/hooks/use-transaction-modal';
+import { useAuth } from '@clerk/nextjs';
+import { Label } from '../ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { cn } from '@/lib/utils';
+import { CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { TimePicker } from '../ui/time-picker';
+import { Guest } from '@prisma/client';
+import { getAvailableRooms } from '@/lib/transactions';
+import { getGuests } from '@/actions/guests';
+import { createTransaction } from '@/actions/transactions';
 
 export const CreateTransactionModal = () => {
-  const router = useRouter();
-  const { isOpen, onClose } = useTransactionModal();
+  const auth = useAuth();
+  const { isOpen, onClose, data } = useTransactionModal();
+  const [rooms, setRooms] = useState<RoomWithType[]>([]);
+  const [guests, setGuests] = useState<Guest[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof createdStaffSchema>>({
-    resolver: zodResolver(createdStaffSchema),
+  const {
+    control,
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<z.infer<typeof createTransactionSchema>>({
+    resolver: zodResolver(createTransactionSchema),
+    defaultValues: {
+      guestId: '',
+      checkIn: data?.startDate,
+      checkOut: data?.endDate,
+      roomId: '',
+      totalPrice: 0,
+      staffId: auth.userId || '',
+    },
   });
 
-  async function onSubmit(values: z.infer<typeof createdStaffSchema>) {
-    if (
-      !values.email ||
-      !values.username ||
-      !values.password ||
-      !values.firstName ||
-      !values.lastName ||
-      !values.role ||
-      !values.position
-    ) {
-      toast('Please fill in the required fields.');
+  const selectedRoomId = watch('roomId');
+  const checkIn = watch('checkIn');
+  const checkOut = watch('checkOut');
+
+  const selectedRoom = rooms.find((room) => room.id === selectedRoomId);
+
+  useEffect(() => {
+    if (checkIn && checkOut) {
+      setIsLoading(true);
+      getAvailableRooms(checkIn, checkOut).then((rooms) => {
+        setRooms(rooms);
+        setIsLoading(false);
+      });
+    }
+
+    getGuests().then((guests) => {
+      setGuests(guests);
+    });
+  }, [checkIn, checkOut]);
+
+  useEffect(() => {
+    if (data) {
+      setValue('checkIn', data.startDate!);
+      setValue('checkOut', data.endDate!);
+      setValue('staffId', auth.userId!);
+    }
+  }, [data, setValue]);
+
+  useEffect(() => {
+    if (selectedRoom && checkIn && checkOut) {
+      const hours = Math.ceil(
+        (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60)
+      );
+      const totalPrice = (selectedRoom.type.price / 24) * hours;
+      setValue('totalPrice', totalPrice);
+    }
+  }, [selectedRoom, checkIn, checkOut, setValue]);
+
+  async function onSubmit(values: CreateTransactionSchema) {
+    const { success, message } = await createTransaction(values);
+    if (success) {
+      toast.success(
+        typeof message === 'string'
+          ? message
+          : 'Transaction created successfully'
+      );
+      onClose();
       return;
     }
 
-    try {
-      const res = await axios.post('/api/staffs', values);
+    toast.error(
+      typeof message === 'string' ? message : 'Failed to create transaction'
+    );
 
-      if (res.status === 200) {
-        toast('Staff member created successfully.');
-      }
-    } catch (error) {
-      console.error(error);
-      toast('Something went wrong when creating user.');
-    } finally {
-      form.reset();
-      onClose();
-
-      router.push('/');
-    }
+    onClose();
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogContent className='sm:max-w-[420px] rounded-sm'>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
-            <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='email'
-                      placeholder='johndoe@example.com'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='username'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder='johndoe' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type='password' placeholder='********' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='firstName'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder='John' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='lastName'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Doe' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='role'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select a role' />
-                      </SelectTrigger>
-                    </FormControl>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className='sm:max-w-[420px] md:max-w-[700px] rounded-sm'>
+        <DialogTitle>Create Transactions</DialogTitle>
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='space-y-2'>
+              <Label htmlFor='guestId'>Guest</Label>
+              <Controller
+                name='guestId'
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select a guest' />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value='org:admin'>Admin</SelectItem>
-                      <SelectItem value='org:member'>Member</SelectItem>
+                      {guests.map((guest: Guest) => (
+                        <SelectItem key={guest.id} value={guest.id}>
+                          {guest.firstName} {guest.lastName}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
+                )}
+              />
+              {errors.guestId && (
+                <p className='text-red-500 text-sm'>{errors.guestId.message}</p>
               )}
-            />
-            <FormField
-              control={form.control}
-              name='position'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Position</FormLabel>
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='roomId'>Room</Label>
+              <Controller
+                name='roomId'
+                control={control}
+                render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
+                    disabled={isLoading}
                   >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select a position' />
-                      </SelectTrigger>
-                    </FormControl>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          isLoading ? 'Loading rooms...' : 'Select a room'
+                        }
+                      />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value='HOUSEKEEPING'>Housekeeping</SelectItem>
-                      <SelectItem value='FRONT_DESK'>Front Desk</SelectItem>
-                      <SelectItem value='MAINTENANCE'>Maintenance</SelectItem>
-                      <SelectItem value='MANAGEMENT'>Management</SelectItem>
-                      <SelectItem value='BELLHOP'>Bellhop</SelectItem>
-                      <SelectItem value='FOOD_AND_BEVERAGE'>
-                        Food and Beverage
-                      </SelectItem>
-                      <SelectItem value='CHEF'>Chef</SelectItem>
-                      <SelectItem value='SECURITY'>Security</SelectItem>
-                      <SelectItem value='EVENT_PLANNING'>
-                        Event Planning
-                      </SelectItem>
-                      <SelectItem value='VALET'>Valet</SelectItem>
-                      <SelectItem value='LAUNDRY'>Laundry</SelectItem>
-                      <SelectItem value='GUEST_RELATIONS'>
-                        Guest Relations
-                      </SelectItem>
+                      {rooms.map((room: RoomWithType) => (
+                        <SelectItem key={room.id} value={room.id}>
+                          {room.roomNumber} - {room.type.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
+                )}
+              />
+              {errors.roomId && (
+                <p className='text-red-500 text-sm'>{errors.roomId.message}</p>
               )}
-            />
-            <Button type='submit' className='w-full'>
-              Add Staff Member
-            </Button>
-          </form>
-        </Form>
+            </div>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='space-y-2'>
+              <Label htmlFor='checkIn'>Check-in Date</Label>
+              <Controller
+                name='checkIn'
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className='mr-2 h-4 w-4' />
+                        {field.value ? (
+                          format(field.value, 'PPP')
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0'>
+                      <Calendar
+                        mode='single'
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                        disabled={(date) =>
+                          date < new Date() || date < new Date('1900-01-01')
+                        }
+                      />
+                      <div className='p-3 border-t border-border'>
+                        <TimePicker
+                          setDate={field.onChange}
+                          date={field.value}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='checkOut'>Check-out Date</Label>
+              <Controller
+                name='checkOut'
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className='mr-2 h-4 w-4' />
+                        {field.value ? (
+                          format(field.value, 'PPP')
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0'>
+                      <Calendar
+                        mode='single'
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                        disabled={(date) =>
+                          date < new Date() || date < new Date('1900-01-01')
+                        }
+                      />
+                      <div className='p-3 border-t border-border'>
+                        <TimePicker
+                          setDate={field.onChange}
+                          date={field.value}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.checkOut && (
+                <p className='text-red-500 text-sm'>
+                  {errors.checkOut.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='space-y-2'>
+              <Label htmlFor='totalPrice'>Total Price</Label>
+              <Input
+                type='number'
+                step='0.01'
+                {...register('totalPrice', { valueAsNumber: true })}
+                readOnly
+              />
+              {errors.totalPrice && (
+                <p className='text-red-500 text-sm'>
+                  {errors.totalPrice.message}
+                </p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='staffId'>Staff ID</Label>
+              <Input type='text' {...register('staffId')} readOnly />
+              {errors.staffId && (
+                <p className='text-red-500 text-sm'>{errors.staffId.message}</p>
+              )}
+            </div>
+          </div>
+
+          <Button type='submit' className='w-full'>
+            Create Transaction
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );

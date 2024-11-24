@@ -1,9 +1,85 @@
 'use server';
 
 import { db } from '@/db';
+import { getAvailableRooms } from '@/lib/transactions';
 import { CreateTransactionSchema } from '@/types';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+
+export const checkOutTransaction = async (id: string) => {
+  const transaction = await db.transaction.findUnique({
+    where: { id },
+    include: { room: true },
+  });
+
+  if (!transaction) {
+    return { success: false, message: 'Transaction not found' };
+  }
+
+  if (transaction.status === 'COMPLETED') {
+    return { success: false, message: 'Transaction already completed' };
+  }
+
+  const roomType = await db.roomType.findUnique({
+    where: { id: transaction.room.roomTypeId },
+  });
+
+  const hours = Math.ceil(
+    (new Date().getTime() - transaction.checkIn.getTime()) / (1000 * 60 * 60)
+  );
+  const totalPrice = (roomType?.price! / 24) * hours;
+
+  await db.transaction.update({
+    where: { id },
+    data: { status: 'COMPLETED', checkOut: new Date(), totalPrice },
+  });
+
+  revalidatePath('/transactions');
+  return { success: true, message: 'Transaction completed' };
+};
+
+export const deleteTransaction = async (id: string) => {
+  const transaction = await db.transaction.findUnique({
+    where: { id },
+  });
+
+  if (!transaction) {
+    return { success: false, message: 'Transaction not found' };
+  }
+
+  if (transaction.status === 'COMPLETED' || transaction.status == 'CHECKIN') {
+    return { success: false, message: 'Transaction has been in progess' };
+  }
+
+  await db.transaction.delete({
+    where: { id },
+  });
+
+  revalidatePath('/transactions');
+  return { success: true, message: 'Transaction deleted' };
+};
+
+export const checkInTransaction = async (id: string) => {
+  const transaction = await db.transaction.findUnique({
+    where: { id },
+  });
+
+  if (!transaction) {
+    return { success: false, message: 'Transaction not found' };
+  }
+
+  if (transaction.status === 'COMPLETED') {
+    return { success: false, message: 'Transaction already completed' };
+  }
+
+  await db.transaction.update({
+    where: { id },
+    data: { status: 'CHECKIN', checkIn: new Date() },
+  });
+
+  revalidatePath('/transactions');
+  return { success: true, message: 'Transaction checked in' };
+};
 
 export const createTransaction = async (data: CreateTransactionSchema) => {
   try {
@@ -20,7 +96,6 @@ export const createTransaction = async (data: CreateTransactionSchema) => {
       return { success: false, message: 'Data is required' };
     }
 
-    console.log(data);
     if (new Date(checkIn) >= new Date(checkOut)) {
       return {
         success: false,
@@ -28,7 +103,9 @@ export const createTransaction = async (data: CreateTransactionSchema) => {
       };
     }
 
-    const room = await db.room.findUnique({ where: { id: roomId } });
+    const rooms = await getAvailableRooms(checkIn, checkOut);
+
+    const room = rooms.find((r) => r.id === roomId);
 
     if (!room) {
       return { success: false, message: 'Room not found' };
@@ -48,8 +125,6 @@ export const createTransaction = async (data: CreateTransactionSchema) => {
         staffId: data.staffId,
       },
     });
-
-    // Update room status if applicable
 
     revalidatePath('/transactions');
     return { success: true, data: transaction, message: 'Transaction created' };

@@ -4,8 +4,11 @@ import { BugIcon, UsersIcon } from 'lucide-react';
 import { UserCard } from '@/components/user-card';
 import { POSITION, User } from '@/types';
 import { CreateStaffButton } from '@/components/create-staff-button';
+import { ORGANIZATION_ID } from '@/constants';
 
 const StaffsPage = async () => {
+  await auth.protect();
+
   const client = await clerkClient();
   const { userId, orgRole, orgId } = await auth();
 
@@ -34,10 +37,10 @@ const StaffsPage = async () => {
 
   const [users, members] = await Promise.all([
     await client.users.getUserList({
-      organizationId: [orgId],
+      organizationId: [ORGANIZATION_ID],
     }),
     await client.organizations.getOrganizationMembershipList({
-      organizationId: orgId,
+      organizationId: ORGANIZATION_ID,
     }),
   ]);
 
@@ -64,7 +67,6 @@ const StaffsPage = async () => {
               email: user.emailAddresses[0]?.emailAddress || '',
               position: user.publicMetadata?.position as POSITION,
               role: organizationUser?.role as 'org:admin' | 'org:member',
-
               orgId: organizationUser?.id || '',
             };
 

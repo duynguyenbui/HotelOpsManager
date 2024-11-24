@@ -1,3 +1,4 @@
+import { ORGANIZATION_ID } from '@/constants';
 import { clerkClient, auth } from '@clerk/nextjs/server';
 
 export async function POST(req: Request) {
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
 
     const organization =
       await client.organizations.createOrganizationMembership({
-        organizationId: currentUser.orgId!,
+        organizationId: ORGANIZATION_ID!,
         userId: user.id,
         role: role,
       });

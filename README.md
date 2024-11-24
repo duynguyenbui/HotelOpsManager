@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Setup Guide
 
-## Getting Started
+## Prerequisites
+- Docker Desktop ([Download here](https://www.docker.com/products/docker-desktop))
+- Node.js 18.17 or higher ([Download here](https://nodejs.org))
 
-First, run the development server:
+## Setup Steps
 
+### 1. Installation
+First, install Docker Desktop and Node.js on your machine. Verify the installations by running:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker --version
+node --version
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+Navigate to the project root directory and install all required packages:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Environment Configuration
+Copy the environment variables from the example file:
+```bash
+cp .env.example .env
+```
+Then, update the `.env` file with your specific configuration values.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Start Docker Containers
+Launch all necessary containers defined in docker-compose.yml:
+```bash
+docker compose up -d
+```
+This will start all required services (database, cache, etc.) in detached mode.
 
-## Learn More
+### 5. Database Migration
+Run Prisma migrations to set up your database schema:
+```bash
+npx prisma migrate dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 6. Database Push
+Apply the Prisma schema changes to your database:
+```bash
+npx prisma db push
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 7. Start Development Server
+Launch the Next.js development server:
+```bash
+npm run dev
+```
+The application will be available at: http://localhost:3000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Troubleshooting
+- If containers fail to start, check Docker logs: `docker compose logs`
+- For database connection issues, ensure your `.env` configuration matches your Docker setup
+- If migrations fail, try resetting the database: `npx prisma migrate reset`
 
-## Deploy on Vercel
+## Additional Commands
+```bash
+# Stop Docker containers
+docker compose down
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# View Prisma Studio (database GUI)
+npx prisma studio
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Reset Database
+npx prisma migrate reset
+
+# View Docker container status
+docker compose ps
+```

@@ -9,11 +9,11 @@ export const CreateStaffButton = () => {
   const { onOpen } = useStaffModal();
   return (
     <Button
-      className='m-2 font-semibold'
+      className='m-2 font-semibold bg-gradient-to-r from-cyan-500 to-blue-500'
       onClick={() => onOpen('create', null)}
     >
       Create
-      <CreativeCommons className='w-4 h-4'/>
+      <CreativeCommons className='w-4 h-4' />
     </Button>
   );
 };

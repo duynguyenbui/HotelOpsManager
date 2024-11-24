@@ -13,6 +13,12 @@ import { format } from 'date-fns';
 import { getStatusColor } from '@/lib/helper';
 import { TransactionsWithGuestAndRoom } from '@/types';
 import Link from 'next/link';
+import {
+  checkInTransaction,
+  checkOutTransaction,
+  deleteTransaction,
+} from '@/actions/transactions';
+import { toast } from 'sonner';
 
 export type TransactionListProps = {
   transactions: TransactionsWithGuestAndRoom[];
@@ -21,6 +27,36 @@ export type TransactionListProps = {
 export default function TransactionList({
   transactions,
 }: TransactionListProps) {
+  async function handleDelete(id: string) {
+    deleteTransaction(id).then((res) => {
+      if (res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
+    });
+  }
+
+  async function handleCheckIn(id: string) {
+    checkInTransaction(id).then((res) => {
+      if (res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
+    });
+  }
+
+  async function handleCheckOut(id: string) {
+    checkOutTransaction(id).then((res) => {
+      if (res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
+    });
+  }
+
   return (
     <div className='space-y-6'>
       {transactions.length === 0 && (
@@ -35,9 +71,17 @@ export default function TransactionList({
               <CardTitle className='text-sm font-semibold'>
                 Transaction #{transaction.id.slice(0, 8)}
               </CardTitle>
-              <Badge className={getStatusColor(transaction.status)}>
-                {transaction.status}
-              </Badge>
+              <div className='flex items-center space-x-3'>
+                <Badge className={getStatusColor(transaction.status)}>
+                  {transaction.status}
+                </Badge>
+                <Badge
+                  variant='destructive'
+                  onClick={() => handleDelete(transaction.id)}
+                >
+                  DELETE
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent>
               <div className='grid grid-cols-2 gap-4'>
@@ -77,19 +121,29 @@ export default function TransactionList({
               </div>
             </CardContent>
             <CardFooter>
-              <Link href={`/transactions/${transaction.id}/checkout`}>
-                <div className='flex items-center justify-between space-x-2'>
-                  <span className='text-sm font-semibold'>
-                    Total: ${transaction.totalPrice.toFixed(2)}
-                  </span>
+              <div className='flex items-center justify-between space-x-2'>
+                <span className='text-sm font-semibold'>
+                  Total: ${transaction.totalPrice.toFixed(2)}
+                </span>
+                {transaction.status === 'CHECKIN' && (
                   <Badge
-                    className='transform transition-transform duration-200 hover:scale-125'
-                    variant='outline'
+                    className='transform transition-transform duration-200 hover:scale-110 cursor-pointer'
+                    variant='destructive'
+                    onClick={() => handleCheckOut(transaction.id)}
                   >
-                    Checkout
+                    Check Out
                   </Badge>
-                </div>
-              </Link>
+                )}
+                {transaction.status === 'PEDNING' && (
+                  <Badge
+                    className='transform transition-transform duration-200 hover:scale-110 cursor-pointer'
+                    variant='destructive'
+                    onClick={() => handleCheckIn(transaction.id)}
+                  >
+                    Check In
+                  </Badge>
+                )}
+              </div>
             </CardFooter>
           </Card>
         ))}

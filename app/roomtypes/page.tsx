@@ -1,11 +1,14 @@
 import { RoomeTypeCard } from '@/components/roome-types';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { db } from '@/db';
+import { cn } from '@/lib/utils';
+import { auth } from '@clerk/nextjs/server';
 import { ArrowBigRightDash, TvIcon } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
 const RoomTypesPage = async () => {
+  await auth.protect();
   const roomTypes = await db.roomType.findMany({
     orderBy: {
       name: 'asc',
@@ -18,9 +21,11 @@ const RoomTypesPage = async () => {
         <div className='text-center py-10 flex items-center justify-between p-5'>
           <div className='font-semibold text-3xl'>Room Types</div>
           <Button asChild className='mt-2 font-semibold'>
-            <Link href='/roomtypes/create'>
+            <Link
+              href='/roomtypes/create'
+              className='bg-gradient-to-r from-cyan-500 to-blue-500'
+            >
               Create <ArrowBigRightDash className='w-4 h-4' />
-              <TvIcon className='w-4 h-4' />
             </Link>
           </Button>
         </div>
@@ -39,7 +44,10 @@ const RoomTypesPage = async () => {
         <h1 className='text-3xl font-bold'>Room Types</h1>
         <Link
           href='/roomtypes/create'
-          className={buttonVariants({ variant: 'secondary' })}
+          className={cn(
+            buttonVariants(),
+            'bg-gradient-to-r from-cyan-500 to-blue-500 font-semibold'
+          )}
         >
           Create
           <TvIcon className='w-4 h-4' />

@@ -91,7 +91,6 @@ enum TransactionStatus {
 
 enum PaymentMethod {
   CASH
-  CREDIT_CARD
   BANK_TRANSFER
 }
 

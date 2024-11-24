@@ -1,16 +1,18 @@
-import { CreateTransactionData } from '../types/index';
 import { create } from 'zustand';
 
-interface useTransactionModalState {
+interface TransactionModalStore {
   isOpen: boolean;
-  onOpen: (data: CreateTransactionData | null) => void;
+  data: {
+    startDate?: Date;
+    endDate?: Date;
+  } | null;
+  onOpen: (data: { startDate?: Date; endDate?: Date }) => void;
   onClose: () => void;
-  data: CreateTransactionData | null;
 }
 
-export const useTransactionModal = create<useTransactionModalState>((set) => ({
+export const useTransactionModal = create<TransactionModalStore>((set) => ({
   isOpen: false,
   data: null,
-  onOpen: (data) => set({ isOpen: true, data: data }),
+  onOpen: (data) => set({ isOpen: true, data }),
   onClose: () => set({ isOpen: false, data: null }),
 }));

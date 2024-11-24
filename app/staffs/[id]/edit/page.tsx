@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -36,6 +36,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
+import axios from 'axios';
 
 const StaffEdit = ({ params }: { params: { id: string } }) => {
   const user = useAuth();
@@ -45,7 +46,6 @@ const StaffEdit = ({ params }: { params: { id: string } }) => {
   const form = useForm<z.infer<typeof updateStaffSchema>>({
     resolver: zodResolver(updateStaffSchema),
     defaultValues: {
-      email: '',
       username: '',
       firstName: '',
       lastName: '',
@@ -54,17 +54,29 @@ const StaffEdit = ({ params }: { params: { id: string } }) => {
     },
   });
 
+  useEffect(() => {
+    const res = axios.get(`/api/staffs/${params.id}`).then((res) => {
+      if (res.status === 200) {
+        form.reset(res.data);
+        toast.success('Employee data loaded successfully!');
+      }
+    });
+  }, []);
+
   async function onSubmit(values: z.infer<typeof updateStaffSchema>) {
     setIsLoading(true);
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)), // Simulating API call
-      {
-        loading: 'Updating employee...',
-        success: 'Employee updated successfully!',
-        error: 'Failed to update employee. Please try again.',
-      }
-    );
-    console.log(values);
+
+    const res = await axios.put(`/api/staffs/${params.id}`, values);
+
+    if (res.status === 200) {
+      toast.success('Employee updated successfully!');
+      router.refresh();
+      router.push('/staffs');
+    } else {
+      router.refresh();
+      toast.error('Failed to update employee');
+    }
+
     setIsLoading(false);
   }
 
@@ -143,19 +155,6 @@ const StaffEdit = ({ params }: { params: { id: string } }) => {
                       )}
                     />
                   </div>
-                  <FormField
-                    control={form.control}
-                    name='email'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input {...field} type='email' />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name='username'

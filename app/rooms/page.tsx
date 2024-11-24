@@ -3,11 +3,13 @@ import { RoomListSkeleton } from '@/components/room-list-skeleton';
 import { buttonVariants } from '@/components/ui/button';
 import { db } from '@/db';
 import { cn } from '@/lib/utils';
+import { auth } from '@clerk/nextjs/server';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { Suspense } from 'react';
 
 const RoomsPage = async () => {
+  await auth.protect();
   const rooms = await db.room.findMany({
     include: {
       type: true,
@@ -18,10 +20,14 @@ const RoomsPage = async () => {
     <div className='container mx-auto px-4 py-12 min-h-screen'>
       <div className='flex justify-between items-center mb-10'>
         <h1 className='text-3xl font-semibold'>Rooms</h1>
-        <Link href='/rooms/create' className={cn(buttonVariants())}>
-          <h1 className='text-center animate-fade-in font-semibold animate hover:zoom-in-105'>
-            Create
-          </h1>
+        <Link
+          href='/rooms/create'
+          className={cn(
+            buttonVariants(),
+            'bg-gradient-to-r from-cyan-500 to-blue-500 font-semibold'
+          )}
+        >
+          Create
           <ArrowRight className='w-4 h-4' />
         </Link>
       </div>

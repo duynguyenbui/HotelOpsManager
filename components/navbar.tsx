@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SignInButton, UserButton, useAuth } from '@clerk/nextjs';
 import {
+  Banknote,
   Building2,
   ClipboardList,
   Home,
@@ -31,12 +32,12 @@ const navItems = [
   { name: 'Guests', href: '/guests', icon: Users },
   { name: 'Staffs', href: '/staffs', icon: UserCircle2 },
   { name: 'Room Types', href: '/roomtypes', icon: TypeOutline },
+  { name: 'Billing', href: '/billing', icon: Banknote },
 ];
 
 export const Navbar = () => {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
-  console.log(pathname);
 
   return (
     <nav className='border-b'>

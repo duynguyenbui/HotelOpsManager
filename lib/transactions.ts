@@ -15,7 +15,7 @@ export const findOverlappingTransactions = async (
   const overlappingTransactions = await db.transaction.findMany({
     where: {
       status: {
-        in: [TransactionStatus.PEDNING],
+        in: [TransactionStatus.PEDNING, TransactionStatus.CHECKIN],
       },
       OR: [
         {
