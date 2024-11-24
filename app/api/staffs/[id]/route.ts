@@ -154,7 +154,7 @@ export async function GET(
 
     const updateStaff: UpdateStaffSchema = {
       id: user.id,
-      organizationId: organization?.id!,
+      organizationId: ORGANIZATION_ID,
       username: user.username ?? '',
       role: organization?.role as 'org:admin' | 'org:member',
       firstName: user.firstName ?? '',

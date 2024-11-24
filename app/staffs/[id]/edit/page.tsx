@@ -55,7 +55,7 @@ const StaffEdit = ({ params }: { params: { id: string } }) => {
   });
 
   useEffect(() => {
-    const res = axios.get(`/api/staffs/${params.id}`).then((res) => {
+    axios.get(`/api/staffs/${params.id}`).then((res) => {
       if (res.status === 200) {
         form.reset(res.data);
         toast.success('Employee data loaded successfully!');

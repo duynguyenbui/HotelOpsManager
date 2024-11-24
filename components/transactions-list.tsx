@@ -12,7 +12,6 @@ import { CalendarIcon, BedDoubleIcon, UserIcon, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { getStatusColor } from '@/lib/helper';
 import { TransactionsWithGuestAndRoom } from '@/types';
-import Link from 'next/link';
 import {
   checkInTransaction,
   checkOutTransaction,
