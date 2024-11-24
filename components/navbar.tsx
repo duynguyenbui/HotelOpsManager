@@ -9,6 +9,8 @@ import {
   Home,
   LogIn,
   Menu,
+  TypeOutline,
+  UserCircle2,
   Users,
 } from 'lucide-react';
 
@@ -24,14 +26,17 @@ import { ModeToggle } from './mode-toggle';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Bookings', href: '/bookings', icon: ClipboardList },
+  { name: 'Transactions', href: '/transactions', icon: ClipboardList },
   { name: 'Rooms', href: '/rooms', icon: Building2 },
   { name: 'Guests', href: '/guests', icon: Users },
+  { name: 'Staffs', href: '/staffs', icon: UserCircle2 },
+  { name: 'Room Types', href: '/roomtypes', icon: TypeOutline },
 ];
 
-export default function Navbar() {
+export const Navbar = () => {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
+  console.log(pathname);
 
   return (
     <nav className='border-b'>
@@ -46,8 +51,8 @@ export default function Navbar() {
           {navItems.map((item) => (
             <Button
               key={item.href}
-              variant={pathname === item.href ? 'default' : 'ghost'}
-              className='text-sm font-medium transition-colors hover:text-primary'
+              variant={pathname.includes(item.href) ? 'default' : 'ghost'}
+              className='text-sm font-medium transition-colors hover:text-blue-600'
               asChild
             >
               <Link href={item.href}>
@@ -88,7 +93,7 @@ export default function Navbar() {
                 {navItems.map((item) => (
                   <Button
                     key={item.href}
-                    variant={pathname === item.href ? 'default' : 'ghost'}
+                    variant={pathname.includes(item.href) ? 'default' : 'ghost'}
                     className='justify-start'
                     asChild
                   >
@@ -105,4 +110,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-}
+};
