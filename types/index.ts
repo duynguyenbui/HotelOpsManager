@@ -60,6 +60,7 @@ export interface UpdateGuestData {
   phone?: string;
   address?: string;
   identityNo?: string;
+  imageUrl?: string;
 }
 
 export interface CreateTransactionData {
@@ -80,9 +81,7 @@ export const roomSchema = z.object({
   roomNumber: z.string().min(1, 'Room number is required'),
   floor: z.number().min(1, 'Floor must be at least 1'),
   status: z.enum(['READY', 'MAINTENANCE', 'CLEANING']),
-  imageUrls: z
-    .array(z.string().url('Invalid URL'))
-    .min(1, 'At least one image URL is required'),
+  imageUrl: z.string().url('Invalid URL'),
   roomTypeId: z.string().min(1, 'Room type is required'),
 });
 
@@ -114,6 +113,7 @@ export const createGuestSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   identityNo: z.string().optional(),
+  imageUrl: z.string().url().optional(),
 });
 
 export const createTransactionSchema = z.object({

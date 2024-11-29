@@ -74,12 +74,14 @@ export default function TransactionList({
                 <Badge className={getStatusColor(transaction.status)}>
                   {transaction.status}
                 </Badge>
-                <Badge
-                  variant='destructive'
-                  onClick={() => handleDelete(transaction.id)}
-                >
-                  DELETE
-                </Badge>
+                {transaction.status === 'PEDNING' && (
+                  <Badge
+                    variant='destructive'
+                    onClick={() => handleDelete(transaction.id)}
+                  >
+                    DELETE
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>

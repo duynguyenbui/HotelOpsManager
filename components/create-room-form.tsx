@@ -26,6 +26,9 @@ import { RoomStatus, RoomType } from '@prisma/client';
 import { getAllRoomTypes } from '@/actions/room-types';
 import { RoomSchema, roomSchema } from '@/types';
 import { createRoom } from '@/actions/room';
+import { FileUpload } from './file-upload';
+import Image from 'next/image';
+import { X } from 'lucide-react';
 
 export function CreateRoomForm() {
   const router = useRouter();
@@ -36,6 +39,7 @@ export function CreateRoomForm() {
     resolver: zodResolver(roomSchema),
     defaultValues: {
       status: 'READY',
+      imageUrl: '',
     },
   });
 
@@ -55,6 +59,7 @@ export function CreateRoomForm() {
 
       if (!res.success) {
         toast.error(res.message);
+        return;
       }
 
       toast.success('Room created', {
@@ -133,20 +138,41 @@ export function CreateRoomForm() {
         />
         <FormField
           control={form.control}
-          name='imageUrls'
+          name='imageUrl'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URLs</FormLabel>
+              <FormLabel>Image</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value.split(',').map((url) => url.trim())
-                    )
-                  }
-                  placeholder='Enter image URLs separated by commas'
-                />
+                <div className='relative w-full h-64 overflow-hidden rounded-lg'>
+                  {field.value ? (
+                    <div className='relative w-full h-full'>
+                      <Image
+                        src={field.value}
+                        alt='Room Image'
+                        layout='fill'
+                        objectFit='cover'
+                      />
+                      <Button
+                        type='button'
+                        variant='destructive'
+                        size='icon'
+                        className='absolute top-2 right-2'
+                        onClick={() => form.setValue('imageUrl', '')}
+                      >
+                        <X className='h-4 w-4' />
+                      </Button>
+                    </div>
+                  ) : (
+                    <FileUpload
+                      endpoint='hotelImage'
+                      onChange={(url) => {
+                        if (url) {
+                          form.setValue('imageUrl', url);
+                        }
+                      }}
+                    />
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

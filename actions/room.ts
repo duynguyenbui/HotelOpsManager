@@ -6,9 +6,9 @@ import { revalidatePath } from 'next/cache';
 
 export const createRoom = async (data: RoomSchema) => {
   try {
-    const { roomNumber, floor, status, imageUrls, roomTypeId } = data;
+    const { roomNumber, floor, status, imageUrl, roomTypeId } = data;
 
-    if (!roomNumber || !floor || !status || !imageUrls || !roomTypeId) {
+    if (!roomNumber || !floor || !status || !imageUrl || !roomTypeId) {
       return { success: false, message: 'No data provided' };
     }
 
@@ -17,7 +17,7 @@ export const createRoom = async (data: RoomSchema) => {
         roomNumber,
         floor,
         status,
-        imageUrls,
+        imageUrl,
         roomTypeId,
         dateEffective: new Date(),
       },
@@ -64,7 +64,7 @@ export const updateRoom = async (id: string, data: RoomSchema) => {
         roomNumber: data.roomNumber,
         floor: data.floor,
         status: data.status,
-        imageUrls: data.imageUrls,
+        imageUrl: data.imageUrl,
         roomTypeId: data.roomTypeId,
       },
     });

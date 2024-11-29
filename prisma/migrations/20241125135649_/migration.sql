@@ -5,7 +5,7 @@ CREATE TYPE "RoomStatus" AS ENUM ('READY', 'MAINTENANCE', 'CLEANING');
 CREATE TYPE "TransactionStatus" AS ENUM ('PEDNING', 'CHECKIN', 'COMPLETED');
 
 -- CreateEnum
-CREATE TYPE "PaymentMethod" AS ENUM ('CASH', 'CREDIT_CARD', 'BANK_TRANSFER');
+CREATE TYPE "PaymentMethod" AS ENUM ('CASH', 'BANK_TRANSFER');
 
 -- CreateEnum
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'REFUNDED', 'CANCELLED');
@@ -31,7 +31,7 @@ CREATE TABLE "Room" (
     "roomTypeId" TEXT NOT NULL,
     "status" "RoomStatus" NOT NULL DEFAULT 'READY',
     "floor" INTEGER NOT NULL,
-    "imageUrls" TEXT[],
+    "imageUrl" TEXT NOT NULL,
     "dateEffective" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

@@ -19,6 +19,8 @@ import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { UpdateGuestData } from '@/types';
+import { FileUpload } from './file-upload';
+import Image from 'next/image';
 
 interface EditGuestFormProps {
   guest: Guest;
@@ -27,12 +29,15 @@ interface EditGuestFormProps {
 export function EditGuestForm({ guest }: EditGuestFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState<boolean>(false);
+  const [editing, setEditing] = useState<boolean>(false);
   const router = useRouter();
 
   const {
     register,
     handleSubmit,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -42,8 +47,14 @@ export function EditGuestForm({ guest }: EditGuestFormProps) {
       phone: guest.phone || '',
       address: guest.address || '',
       identityNo: guest.identityNo || '',
+      imageUrl: guest.imageUrl || '',
     },
   });
+
+  const changeImage = (url: string) => {
+    setValue('imageUrl', url);
+    setEditing(false);
+  };
 
   const onSubmit = async (data: UpdateGuestData) => {
     setIsSubmitting(true);
@@ -132,6 +143,27 @@ export function EditGuestForm({ guest }: EditGuestFormProps) {
           <div className='space-y-2'>
             <Label htmlFor='identityNo'>Identity Number</Label>
             <Input id='identityNo' {...register('identityNo')} />
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='imageUrl'>Image</Label>
+            {!editing && (
+              <div
+                className='relative w-full h-full group'
+                onClick={() => setEditing(!editing)}
+              >
+                <Image
+                  src={getValues('imageUrl')}
+                  alt='Image URL'
+                  width={400}
+                  height={400}
+                />
+              </div>
+            )}
+
+            {editing && (
+              <FileUpload onChange={changeImage} endpoint={'hotelImage'} />
+            )}
           </div>
 
           {error && (

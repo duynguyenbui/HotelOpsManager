@@ -4,11 +4,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'media.istockphoto.com',
+        hostname: 'myroomdesigner.ai',
       },
       {
         protocol: 'https',
-        hostname: 'myroomdesigner.ai',
+        hostname: 'utfs.io',
       },
     ],
   },

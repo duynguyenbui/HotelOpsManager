@@ -21,7 +21,7 @@ export const RoomCard = ({ room }: { room: RoomWithType }) => {
       <Card className='overflow-hidden transition-all duration-300 hover:shadow-lg'>
         <div className='relative h-48'>
           <Image
-            src={room.imageUrls[0] || '/placeholder.svg'}
+            src={room.imageUrl || '/placeholder.svg'}
             alt={`Room ${room.roomNumber}`}
             layout='fill'
             objectFit='cover'
@@ -63,12 +63,12 @@ export const RoomCard = ({ room }: { room: RoomWithType }) => {
           </div>
           <div className='mt-4'>
             <p className='text-sm font-semibold mb-2'>Amenities:</p>
-            <div className='flex flex-wrap gap-2'>
+            <div className='flex gap-2'>
               {room.type.amenities.map((amenity) => (
                 <Badge
                   key={amenity}
                   variant='secondary'
-                  className='flex items-center space-x-1 text-xs'
+                  className='text-muted-foreground'
                 >
                   {amenityIcons[amenity] || null}
                   <span>{amenity}</span>

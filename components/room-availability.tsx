@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, BedDouble, CogIcon, HotelIcon } from 'lucide-react';
@@ -63,9 +64,11 @@ export const RoomAvailability = () => {
 
   return (
     <>
-      <div className='flex justify-between md:ml-[60px] lg:ml-[170px] mt-10'>
+      <div className='flex justify-between md:ml-[60px] lg:ml-[170px] mt-10 mb-5'>
         <div className='flex space-x-2'>
-          <h1 className='text-3xl font-bold mb-4'>Transactions Management</h1>
+          <h1 className='text-3xl font-bold mb-4 -ml-14'>
+            Transactions Management
+          </h1>
           <Button
             onClick={() =>
               onOpen({
@@ -176,8 +179,9 @@ export const RoomAvailability = () => {
                 className='overflow-hidden transition-transform duration-300 hover:scale-105'
               >
                 <div className='relative'>
-                  <img
-                    src={room.imageUrls[0]}
+                  <Image
+                    fill
+                    src={room.imageUrl}
                     alt={`Room ${room.roomNumber}`}
                     className='w-full h-48 object-cover'
                   />
@@ -203,7 +207,7 @@ export const RoomAvailability = () => {
                       </CardDescription>
                     </div>
                   </div>
-                  <div className='flex space-y-2'>
+                  <div className='flex mt-2 space-x-2'>
                     {room.type.amenities.map((amenity) => (
                       <Badge key={amenity}>{amenity}</Badge>
                     ))}

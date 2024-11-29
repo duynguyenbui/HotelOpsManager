@@ -32,7 +32,7 @@ const navItems = [
   { name: 'Guests', href: '/guests', icon: Users },
   { name: 'Staffs', href: '/staffs', icon: UserCircle2 },
   { name: 'Room Types', href: '/roomtypes', icon: TypeOutline },
-  { name: 'Billing', href: '/billing', icon: Banknote },
+  { name: 'Payment', href: '/payment', icon: Banknote },
 ];
 
 export const Navbar = () => {

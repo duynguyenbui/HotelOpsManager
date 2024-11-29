@@ -26,7 +26,7 @@ model Room {
   roomTypeId    String
   status        RoomStatus    @default(READY)
   floor         Int
-  imageUrls     String[]
+  imageUrl      String
   transactions  Transaction[]
   dateEffective DateTime      @updatedAt
   createdAt     DateTime      @default(now())
@@ -57,6 +57,7 @@ model Guest {
   phone        String?
   address      String?
   identityNo   String?
+  imageUrl     String?
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
