@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Edit2, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { UpdateGuestData } from '@/types';
@@ -147,23 +147,44 @@ export function EditGuestForm({ guest }: EditGuestFormProps) {
 
           <div className='space-y-2'>
             <Label htmlFor='imageUrl'>Image</Label>
-            {!editing && (
-              <div
-                className='relative w-full h-full group'
-                onClick={() => setEditing(!editing)}
-              >
-                <Image
-                  src={getValues('imageUrl')}
-                  alt='Image URL'
-                  width={400}
-                  height={400}
-                />
-              </div>
-            )}
-
-            {editing && (
-              <FileUpload onChange={changeImage} endpoint={'hotelImage'} />
-            )}
+            <div className='relative'>
+              {getValues('imageUrl') && (
+                <div className='relative w-full h-64 mb-4'>
+                  <Image
+                    src={getValues('imageUrl')}
+                    alt='Guest'
+                    layout='fill'
+                    objectFit='cover'
+                    className='rounded-md'
+                  />
+                </div>
+              )}
+              {editing ? (
+                <div className='space-y-2'>
+                  <FileUpload onChange={changeImage} endpoint={'hotelImage'} />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    onClick={() => setEditing(false)}
+                    className='mt-2'
+                  >
+                    <X className='mr-2 h-4 w-4' />
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  onClick={() => setEditing(true)}
+                >
+                  <Edit2 className='mr-2 h-4 w-4' />
+                  {getValues('imageUrl') ? 'Change Image' : 'Add Image'}
+                </Button>
+              )}
+            </div>
           </div>
 
           {error && (

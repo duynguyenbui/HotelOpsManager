@@ -5,10 +5,7 @@ CREATE TYPE "RoomStatus" AS ENUM ('READY', 'MAINTENANCE', 'CLEANING');
 CREATE TYPE "TransactionStatus" AS ENUM ('PEDNING', 'CHECKIN', 'COMPLETED');
 
 -- CreateEnum
-CREATE TYPE "PaymentMethod" AS ENUM ('CASH', 'BANK_TRANSFER');
-
--- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'REFUNDED', 'CANCELLED');
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'CANCELLED');
 
 -- CreateTable
 CREATE TABLE "RoomType" (
@@ -64,6 +61,7 @@ CREATE TABLE "Guest" (
     "phone" TEXT,
     "address" TEXT,
     "identityNo" TEXT,
+    "imageUrl" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -75,10 +73,7 @@ CREATE TABLE "Bill" (
     "id" TEXT NOT NULL,
     "transactionId" TEXT NOT NULL,
     "billDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "subtotal" DOUBLE PRECISION NOT NULL,
-    "tax" DOUBLE PRECISION NOT NULL DEFAULT 0.1,
     "totalAmount" DOUBLE PRECISION NOT NULL,
-    "paymentMethod" "PaymentMethod" NOT NULL DEFAULT 'CASH',
     "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
     "notes" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

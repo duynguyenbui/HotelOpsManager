@@ -27,15 +27,31 @@ export const checkOutTransaction = async (id: string) => {
   const hours = Math.ceil(
     (new Date().getTime() - transaction.checkIn.getTime()) / (1000 * 60 * 60)
   );
-  const totalPrice = (roomType?.price! / 24) * hours;
+  const totalPrice = ((roomType?.price ?? 0) / 24) * hours;
 
   await db.transaction.update({
     where: { id },
     data: { status: 'COMPLETED', checkOut: new Date(), totalPrice },
   });
 
+  // TODO: Handling payment with stripe
+  const bill = await db.bill.create({
+    data: {
+      totalAmount: totalPrice,
+      transactionId: id,
+      paymentStatus: 'PENDING',
+    },
+  });
+
+  if (!bill) {
+    return { success: false, message: 'Failed to create bill' };
+  }
+
   revalidatePath('/transactions');
-  return { success: true, message: 'Transaction completed' };
+  return {
+    success: true,
+    message: `Transaction completed, please check bill for payment ${bill.id}`,
+  };
 };
 
 export const deleteTransaction = async (id: string) => {

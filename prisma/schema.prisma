@@ -68,11 +68,10 @@ model Bill {
   transactionId String        @unique
   transaction   Transaction   @relation(fields: [transactionId], references: [id])
   billDate      DateTime      @default(now())
-  subtotal      Float
-  tax           Float         @default(0.1)
   totalAmount   Float
   paymentMethod PaymentMethod @default(CASH)
   paymentStatus PaymentStatus @default(PENDING)
+  paymentDate   DateTime?
   notes         String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -92,12 +91,11 @@ enum TransactionStatus {
 
 enum PaymentMethod {
   CASH
-  BANK_TRANSFER
+  CARD
 }
 
 enum PaymentStatus {
   PENDING
   PAID
-  REFUNDED
   CANCELLED
 }

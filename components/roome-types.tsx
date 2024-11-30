@@ -17,7 +17,7 @@ interface RoomTypeCardProps {
 export function RoomeTypeCard({ roomType }: RoomTypeCardProps) {
   return (
     <Link
-      className='transition-transform duration-300 hover:scale-110'
+      className='transition-transform duration-300 hover:scale-105'
       href={`/roomtypes/${roomType.id}/edit`}
     >
       <Card className='h-full flex flex-col'>
