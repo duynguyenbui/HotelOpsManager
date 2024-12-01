@@ -6,8 +6,14 @@ import { RevenueCard } from '@/components/dashboard/revenue-card';
 import { GuestStatisticsCard } from '@/components/dashboard/guest-statistics-card';
 import { RecentTransactionsCard } from '@/components/dashboard/recent-transactions-card';
 import { UpcomingCheckInsCard } from '@/components/dashboard/upcoming-check-ins-card';
+import { RoomTypeDistributionCard } from '@/components/dashboard/room-type-distribution-card';
+import { getRoomTypeDistribution } from '@/actions/dashboard';
+import { auth } from '@clerk/nextjs/server';
 
 export default async function DashboardPage() {
+  await auth.protect();
+  const roomTypeData = await getRoomTypeDistribution();
+
   return (
     <DashboardShell className='p-4'>
       <DashboardHeader
@@ -36,13 +42,13 @@ export default async function DashboardPage() {
         >
           <RecentTransactionsCard />
         </Suspense>
-        {/* <Suspense
+        <Suspense
           fallback={
             <div className='h-[400px] rounded-md bg-muted lg:col-span-3' />
           }
         >
-          <RoomTypeDistributionCard />
-        </Suspense> */}
+          <RoomTypeDistributionCard data={roomTypeData} />
+        </Suspense>
       </div>
     </DashboardShell>
   );
