@@ -6,6 +6,23 @@ import { CreateTransactionSchema } from '@/types';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
+export const getTransactionById = async (id: string) => {
+  const transaction = await db.transaction.findUnique({
+    where: { id },
+    include: {
+      guest: true,
+      room: {
+        include: {
+          type: true,
+        },
+      },
+      bill: true,
+    },
+  });
+
+  return transaction;
+};
+
 export const checkOutTransaction = async (id: string) => {
   const transaction = await db.transaction.findUnique({
     where: { id },

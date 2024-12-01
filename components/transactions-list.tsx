@@ -18,6 +18,7 @@ import {
   deleteTransaction,
 } from '@/actions/transactions';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 export type TransactionListProps = {
   transactions: TransactionsWithGuestAndRoom[];
@@ -67,9 +68,11 @@ export default function TransactionList({
         {transactions.map((transaction) => (
           <Card key={transaction.id} className='w-full'>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-semibold'>
-                Transaction #{transaction.id.slice(0, 8)}
-              </CardTitle>
+              <Link href={`/transactions/${transaction.id}`}>
+                <CardTitle className='text-sm font-semibold'>
+                  Transaction #{transaction.id.slice(0, 8)}
+                </CardTitle>
+              </Link>
               <div className='flex items-center space-x-3'>
                 <Badge className={getStatusColor(transaction.status)}>
                   {transaction.status}

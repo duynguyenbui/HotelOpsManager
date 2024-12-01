@@ -33,9 +33,11 @@ import { Guest } from '@prisma/client';
 import { getAvailableRooms } from '@/lib/transactions';
 import { getGuests } from '@/actions/guests';
 import { createTransaction } from '@/actions/transactions';
+import { useRouter } from 'next/navigation';
 
 export const CreateTransactionModal = () => {
   const auth = useAuth();
+  const router = useRouter();
   const { isOpen, onClose, data } = useTransactionModal();
   const [rooms, setRooms] = useState<RoomWithType[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -114,6 +116,7 @@ export const CreateTransactionModal = () => {
       typeof message === 'string' ? message : 'Failed to create transaction'
     );
 
+    router.refresh();
     onClose();
   }
 

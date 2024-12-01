@@ -27,11 +27,13 @@ import { TimePicker } from '@/components/ui/time-picker';
 import { Badge } from '@/components/ui/badge';
 import { useTransactionModal } from '@/hooks/use-transaction-modal';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 type Room = RoomWithType;
 
 export const RoomAvailability = () => {
   const { onOpen } = useTransactionModal();
+  const router = useRouter();
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(
     new Date(startDate.getTime() + 24 * 60 * 60 * 1000)
