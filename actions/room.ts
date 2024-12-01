@@ -3,6 +3,7 @@
 import { db } from '@/db';
 import redis from '@/redis';
 import { RoomSchema, RoomWithType } from '@/types';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 
 export const getAllRooms = async () => {
@@ -25,6 +26,12 @@ export const getAllRooms = async () => {
 };
 
 export const createRoom = async (data: RoomSchema) => {
+  const { orgRole } = await auth();
+
+  if (orgRole !== 'org:admin') {
+    return { success: false, message: 'Unauthorized' };
+  }
+
   try {
     const { roomNumber, floor, status, imageUrl, roomTypeId } = data;
 
@@ -53,6 +60,12 @@ export const createRoom = async (data: RoomSchema) => {
 
 export const updateRoom = async (id: string, data: RoomSchema) => {
   try {
+    const { orgRole } = await auth();
+
+    if (orgRole !== 'org:admin') {
+      return { success: false, message: 'Unauthorized' };
+    }
+
     if (!id || !data) {
       return { success: false, message: 'No data provided' };
     }

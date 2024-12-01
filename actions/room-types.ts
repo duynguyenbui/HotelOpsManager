@@ -2,9 +2,16 @@
 
 import { db } from '@/db';
 import { RoomTypeSchema } from '@/types';
+import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 
 export const updateRoomType = async (data: RoomTypeSchema & { id: string }) => {
+  const { orgRole } = await auth();
+
+  if (orgRole !== 'org:admin') {
+    return { success: false, message: 'Unauthorized' };
+  }
+
   const { id, name, description, amenities, capacity, price } = data;
 
   if (!name || !description || !amenities || !capacity || !price) {
@@ -40,6 +47,12 @@ export const getAllRoomTypes = async () => {
 
 export const createRoomType = async (data: RoomTypeSchema) => {
   try {
+    const { orgRole } = await auth();
+
+    if (orgRole !== 'org:admin') {
+      return { success: false, message: 'Unauthorized' };
+    }
+
     const { name, description, amenities, capacity, price } = data;
 
     if (!name || !description || !amenities || !capacity || !price) {
