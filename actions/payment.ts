@@ -91,3 +91,11 @@ export async function getAllBills() {
     throw new Error('Failed to fetch bills');
   }
 }
+
+export const getBillingNotPaid = async () => {
+  return await db.bill.findMany({
+    where: {
+      paymentStatus: 'PENDING',
+    },
+  });
+};

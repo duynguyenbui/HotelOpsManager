@@ -19,7 +19,7 @@ export const getAllRooms = async () => {
     },
   });
 
-  await redis.set('rooms', rooms, { ex: 3600 });
+  await redis.set('rooms', rooms, { ex: 500 });
 
   return rooms;
 };
@@ -88,6 +88,8 @@ export const updateRoom = async (id: string, data: RoomSchema) => {
         roomTypeId: data.roomTypeId,
       },
     });
+
+    await redis.flushall();
 
     revalidatePath('/rooms');
 

@@ -160,6 +160,7 @@ export const createTransaction = async (data: CreateTransactionSchema) => {
     });
 
     revalidatePath('/transactions');
+
     return { success: true, data: transaction, message: 'Transaction created' };
   } catch (error) {
     console.error(error);
@@ -172,4 +173,12 @@ export const createTransaction = async (data: CreateTransactionSchema) => {
     }
     return { success: false, message: 'An unexpected error occurred' };
   }
+};
+
+export const getPendingTransactions = () => {
+  return db.transaction.findMany({
+    where: {
+      status: 'PEDNING',
+    },
+  });
 };

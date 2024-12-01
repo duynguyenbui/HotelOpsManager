@@ -10,7 +10,7 @@ import {
   Home,
   LogIn,
   Menu,
-  TypeOutline,
+  TypeIcon as TypeOutline,
   UserCircle2,
   Users,
 } from 'lucide-react';
@@ -24,6 +24,9 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { ModeToggle } from './mode-toggle';
+import { useEffect, useState } from 'react';
+import { getPendingTransactions } from '@/actions/transactions';
+import { getBillingNotPaid } from '@/actions/payment';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -38,6 +41,24 @@ const navItems = [
 export const Navbar = () => {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
+  const [transactionsPending, setTransactionsPending] = useState<number>(0);
+  const [billingPending, setBillingPending] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const transactions = await getPendingTransactions();
+      setTransactionsPending(transactions.length);
+
+      const billing = await getBillingNotPaid();
+      setBillingPending(billing.length);
+    };
+
+    fetchData();
+
+    const intervalId = setInterval(fetchData, 3000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <nav className='border-b'>
@@ -53,12 +74,16 @@ export const Navbar = () => {
             <Button
               key={item.href}
               variant={pathname.includes(item.href) ? 'default' : 'ghost'}
-              className='text-sm font-medium transition-colors hover:text-blue-600'
+              className='text-sm font-medium transition-colors hover:text-blue-600 relative'
               asChild
             >
               <Link href={item.href}>
                 <item.icon className='mr-2 h-4 w-4' />
                 {item.name}
+                {(item.name === 'Transactions' && transactionsPending > 0) ||
+                (item.name === 'Payment' && billingPending > 0) ? (
+                  <span className='absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full'></span>
+                ) : null}
               </Link>
             </Button>
           ))}
@@ -95,12 +120,17 @@ export const Navbar = () => {
                   <Button
                     key={item.href}
                     variant={pathname.includes(item.href) ? 'default' : 'ghost'}
-                    className='justify-start'
+                    className='justify-start relative'
                     asChild
                   >
                     <Link href={item.href}>
                       <item.icon className='mr-2 h-4 w-4' />
                       {item.name}
+                      {(item.name === 'Transactions' &&
+                        transactionsPending > 0) ||
+                      (item.name === 'Payment' && billingPending > 0) ? (
+                        <span className='absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full'></span>
+                      ) : null}
                     </Link>
                   </Button>
                 ))}
