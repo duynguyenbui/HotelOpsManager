@@ -1,8 +1,28 @@
 'use server';
 
 import { db } from '@/db';
-import { RoomSchema } from '@/types';
+import redis from '@/redis';
+import { RoomSchema, RoomWithType } from '@/types';
 import { revalidatePath } from 'next/cache';
+
+export const getAllRooms = async () => {
+  const cahcedRooms = await redis.get('rooms');
+
+  if (cahcedRooms) {
+    console.log('Returning cached rooms');
+    return cahcedRooms as RoomWithType[];
+  }
+
+  const rooms = await db.room.findMany({
+    include: {
+      type: true,
+    },
+  });
+
+  await redis.set('rooms', rooms, { ex: 3600 });
+
+  return rooms;
+};
 
 export const createRoom = async (data: RoomSchema) => {
   try {

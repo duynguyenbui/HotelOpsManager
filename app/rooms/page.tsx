@@ -1,7 +1,7 @@
+import { getAllRooms } from '@/actions/room';
 import { RoomCard } from '@/components/room-card';
 import { RoomListSkeleton } from '@/components/room-list-skeleton';
 import { buttonVariants } from '@/components/ui/button';
-import { db } from '@/db';
 import { cn } from '@/lib/utils';
 import { auth } from '@clerk/nextjs/server';
 import { ArrowRight } from 'lucide-react';
@@ -10,11 +10,7 @@ import React, { Suspense } from 'react';
 
 const RoomsPage = async () => {
   await auth.protect();
-  const rooms = await db.room.findMany({
-    include: {
-      type: true,
-    },
-  });
+  const rooms = await getAllRooms();
 
   return (
     <div className='container mx-auto px-4 py-12 min-h-screen'>
